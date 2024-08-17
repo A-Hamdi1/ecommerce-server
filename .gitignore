@@ -1,0 +1,6 @@
+# Ignore log files
+error.log
+combined.log
+
+# Ignore environment variables file
+.env
