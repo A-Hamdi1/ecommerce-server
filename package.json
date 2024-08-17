@@ -21,6 +21,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.3",
+    "node-readme": "^0.1.9",
     "nodemailer": "^6.9.14",
     "winston": "^3.14.2"
   }
