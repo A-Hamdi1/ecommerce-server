@@ -66,13 +66,13 @@ const registerUser = async (req, res) => {
       // const transporter = nodemailer.createTransport({
       //   service: 'Gmail',
       //   auth: {
-      //     user: "akramhamdi711@gmail.com",
-      //     pass: "ylmhxchzxcogqojr",
+      //     user: process.env.EMAIL_USER,
+      //     pass: process.env.EMAIL_PASS,
       //   }
       // });
 
       // const mailOptions = {
-      //   from: "akramhamdi711@gmail.com",
+      //   from: process.env.EMAIL_USER,
       //   to: email,
       //   subject: 'Registration OTP',
       //   text: message,
@@ -113,7 +113,9 @@ const registerUser = async (req, res) => {
 };
 
 const CheckOtpRegister = async (req, res) => {
-  const { otp } = req.body;
+  const {
+    otp
+  } = req.body;
 
   try {
 
@@ -340,13 +342,13 @@ const forgotPassword = async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail',
       auth: {
-        user: "akramhamdi711@gmail.com",
-        pass: "ylmhxchzxcogqojr",
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       }
     });
 
     const mailOptions = {
-      from: "akramhamdi711@gmail.com",
+      from: process.env.EMAIL_USER,
       to: email,
       subject: 'Password Reset OTP',
       text: message,
