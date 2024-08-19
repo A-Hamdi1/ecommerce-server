@@ -40,6 +40,8 @@ const validateResetPassword = [
 const validateUpdateProfile = [
   check('username', 'Username is required').optional().not().isEmpty(),
   check('email', 'Please include a valid email').optional().isEmail(),
+  check('city', 'Please include a valid city').optional().not().isEmpty(),
+  check('dateOfBirth', 'Please include a valid dateOfBirth').optional().isDate(),
   check('password', 'Password must be at least 8 characters').optional().isLength({ min: 8 }),
 ];
 

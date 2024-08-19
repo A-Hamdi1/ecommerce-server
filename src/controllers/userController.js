@@ -230,6 +230,9 @@ const getUserProfile = async (req, res) => {
         _id: user._id,
         username: user.username,
         email: user.email,
+        city: user.city,
+        dateOfBirth: user.dateOfBirth,
+
       });
     } else {
       res.status(404).json({
@@ -256,6 +259,8 @@ const updateUserProfile = async (req, res) => {
 
     if (user) {
       user.username = req.body.username || user.username;
+      user.city = req.body.city || user.city;
+      user.dateOfBirth = req.body.dateOfBirth || user.dateOfBirth;
 
       if (req.body.password) {
         // Check if new password has been used before
@@ -296,6 +301,8 @@ const updateUserProfile = async (req, res) => {
         _id: updatedUser._id,
         username: updatedUser.username,
         email: updatedUser.email,
+        city: updatedUser.city,
+        dateOfBirth: updatedUser.dateOfBirth,
         token,
       });
     } else {
