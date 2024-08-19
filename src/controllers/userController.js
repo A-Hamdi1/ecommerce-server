@@ -15,6 +15,7 @@ const generateToken = (id) => {
   });
 };
 
+
 const registerUser = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -43,68 +44,43 @@ const registerUser = async (req, res) => {
       });
     }
 
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const hashedOTP = await bcrypt.hash(otp, 10);
+
     const user = await User.create({
       username,
       email,
       password,
       phoneNumber,
       city,
-      dateOfBirth
+      dateOfBirth,
+      otp: hashedOTP, 
+      otpExpire: Date.now() + 10 * 60 * 1000 // OTP valid for 10 minutes
     });
 
-    if (user) {
-      // const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      // const hashedOTP = await bcrypt.hash(otp, 10);
+    const message = `Your OTP for registration is: ${otp}. It is valid for 10 minutes.`;
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      }
+    });
 
-      // user.otp = hashedOTP;
-      // user.otpExpire = Date.now() + 10 * 60 * 1000; // 10 minutes
-      // await user.save();
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Registration OTP',
+      text: message,
+    };
 
-      // const message = `Your OTP for registration is: ${otp}. It is valid for 10 minutes.`;
+    await transporter.sendMail(mailOptions);
+    console.log("Email containing OTP sent to:", email);
 
-      // // Create a transporter
-      // const transporter = nodemailer.createTransport({
-      //   service: 'Gmail',
-      //   auth: {
-      //     user: process.env.EMAIL_USER,
-      //     pass: process.env.EMAIL_PASS,
-      //   }
-      // });
-
-      // const mailOptions = {
-      //   from: process.env.EMAIL_USER,
-      //   to: email,
-      //   subject: 'Registration OTP',
-      //   text: message,
-      // };
-
-      // await transporter.sendMail(mailOptions);
-      const token = generateToken(user._id);
-      user.token = token;
-      await user.save();
-
-      res.cookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      });
-
-      res.status(201).json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        phoneNumber: user.phoneNumber,
-        city: user.city,
-        dateOfBirth: user.dateOfBirth,
-        token,
-        // message: 'User registered successfully. Please verify your OTP.',
-
-      });
-    } else {
-      res.status(400).json({
-        message: 'Invalid user data'
-      });
-    }
+    res.status(201).json({
+      message: 'User registered, please verify OTP',
+      userId: user._id
+    });
   } catch (error) {
     res.status(500).json({
       message: 'Server error'
@@ -114,43 +90,66 @@ const registerUser = async (req, res) => {
 
 const CheckOtpRegister = async (req, res) => {
   const {
+    userId,
     otp
   } = req.body;
 
   try {
-
-    const user = await User.findOne({
-      otpExpire: {
-        $gt: Date.now()
-      },
-    });
+    const user = await User.findById(userId);
 
     if (!user) {
-      return res.status(400).json({
-        message: 'OTP expired or invalid'
+      return res.status(404).json({
+        message: 'User not found'
       });
     }
+
+    if (user.otpExpire < Date.now()) {
+      return res.status(400).json({
+        message: 'OTP expired'
+      });
+    }
+
     const isOTPValid = await bcrypt.compare(otp, user.otp);
+
     if (!isOTPValid) {
       return res.status(400).json({
         message: 'Invalid OTP'
       });
     }
 
+    // user.otp = undefined;
+    // user.otpExpire = undefined;
+    // const token = generateToken(user._id);
+    // user.token = token;
+    // await user.save();
+
     user.otp = undefined;
     user.otpExpire = undefined;
     await user.save();
 
-    return res.json({
-      status: true,
-      message: "User registered successfully.",
+    const token = generateToken(user._id);
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
+    res.status(200).json({
+      message: 'OTP verified successfully',
+      token,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email
+      }
     });
   } catch (error) {
     res.status(500).json({
       message: 'Server error'
     });
   }
-}
+};
+
 
 const authUser = async (req, res) => {
   const errors = validationResult(req);
