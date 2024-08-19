@@ -4,14 +4,3 @@ combined.log
 
 # Ignore environment variables file
 .env
-
-# Ignore everything in Users and Products folders
-/public/Users/*
-/public/Products/*
-
-# But keep the folders themselves
-!/public/Users/
-/public/Users/.keep
-
-!/public/Products/
-/public/Products/.keep
