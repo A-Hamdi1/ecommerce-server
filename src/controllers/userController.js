@@ -5,6 +5,7 @@ const {
 } = require('express-validator');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcryptjs');
+const upload = require('../middleware/mediaMiddleware')
 require('dotenv').config();
 
 const generateToken = (id) => {
@@ -54,7 +55,7 @@ const registerUser = async (req, res) => {
       phoneNumber,
       city,
       dateOfBirth,
-      otp: hashedOTP, 
+      otp: hashedOTP,
       otpExpire: Date.now() + 10 * 60 * 1000 // OTP valid for 10 minutes
     });
 
@@ -317,6 +318,36 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+const uploadProfileImage = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found'
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: 'No file uploaded'
+      });
+    }
+
+    user.profilePicture = `/Users/${req.file.filename}`;
+    await user.save();
+
+    res.status(200).json({
+      message: 'Profile image uploaded successfully',
+      profileImage: user.profileImage,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Server error'
+    });
+  }
+};
+
 
 const forgotPassword = async (req, res) => {
   const {
@@ -476,6 +507,7 @@ module.exports = {
   logoutUser,
   getUserProfile,
   updateUserProfile,
+  uploadProfileImage,
   forgotPassword,
   resetPassword,
   validateToken

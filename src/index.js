@@ -4,19 +4,27 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 dotenv.config();
+const path = require('path');
 const userRoutes = require('./routes/userRoutes');
 const connectDB = require('./config/db');
-const { errorHandler } = require('./middleware/errorMiddleware');
+const {
+    errorHandler
+} = require('./middleware/errorMiddleware');
 const logger = require('./utils/logger');
 
 const app = express();
 
-app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 
 connectDB();
+
+app.use('/userPictures', express.static(path.join(__dirname, '../public/Users')));
 
 app.use('/api/users', userRoutes);
 
