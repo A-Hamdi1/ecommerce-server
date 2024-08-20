@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   phoneNumber: { type: Number, required: true, unique: true },
   password: { type: String, required: true },
-  profilePicture: { type: String, default:"" },
+  userImage: { type: String, default:"" },
   city: { type: String },
   dateOfBirth: { type: Date },
   role: { type: String, enum: ["client", "admin"], default: "client" },

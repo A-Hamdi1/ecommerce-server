@@ -334,12 +334,12 @@ const uploadProfileImage = async (req, res) => {
       });
     }
 
-    user.profilePicture = `/Users/${req.file.filename}`;
+    user.userImage = `/Users/${req.file.filename}`;
     await user.save();
 
     res.status(200).json({
       message: 'Profile image uploaded successfully',
-      profileImage: user.profileImage,
+      userImage: user.userImage,
     });
   } catch (error) {
     res.status(500).json({
